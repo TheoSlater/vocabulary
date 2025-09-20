@@ -41,7 +41,7 @@ const HomeScreen: React.FC = () => {
     };
 
     const fetchRandomWords = async () => {
-      const words = await getRandomWords(50);
+      const words = await getRandomWords(10);
       const wordsWithDefinitions: Word[] = [];
 
       for (const w of words) {

@@ -1,10 +1,9 @@
-// services/API.ts
-import randomWords from "../data/randomWords.json"; // <-- your 1000-word JSON
+import randomWords from "../data/randomWords.json";
 
 // Wordnik WOTD
 export const getWordOfTheDay = async () => {
   try {
-    const apiKey = "ogg81z5wuy7tyludpjuqnrsm4icqp8ic3x4re91phta8npand"; // put in .env ideally
+    const apiKey = "ogg81z5wuy7tyludpjuqnrsm4icqp8ic3x4re91phta8npand"; // TODO: Put in ENV!!!!
     const response = await fetch(
       `https://api.wordnik.com/v4/words.json/wordOfTheDay?api_key=${apiKey}`
     );
