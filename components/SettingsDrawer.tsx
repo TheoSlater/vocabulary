@@ -2,77 +2,168 @@ import React from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   Animated,
-  StyleSheet,
+  TouchableOpacity,
   Switch,
-  Dimensions,
+  Platform,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "../contexts/ThemeContext";
-
-const { width } = Dimensions.get("window");
+import { Theme } from "../contexts/ThemeContext";
 
 interface SettingsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  translateX: Animated.Value;
+  translateY: Animated.Value;
+  theme: Theme;
+  isDark: boolean;
+  toggleTheme: () => void;
 }
 
-const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
+export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   isOpen,
   onClose,
-  translateX,
+  translateY,
+  theme,
+  isDark,
+  toggleTheme,
 }) => {
-  const { theme, isDark, toggleTheme } = useTheme();
-
   if (!isOpen) return null;
 
   return (
     <>
-      {/* Backdrop */}
       <TouchableOpacity
-        style={styles.backdrop}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          zIndex: 999,
+        }}
         activeOpacity={1}
         onPress={onClose}
       />
 
-      {/* Drawer */}
       <Animated.View
         style={[
-          styles.drawer,
           {
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 280,
+            zIndex: 1000,
+            borderTopLeftRadius: Platform.OS === "ios" ? 20 : 16,
+            borderTopRightRadius: Platform.OS === "ios" ? 20 : 16,
             backgroundColor: theme.colors.surface,
-            transform: [{ translateX }],
-            ...theme.shadows.card,
+            transform: [{ translateY }],
+            ...(Platform.OS === "ios" && {
+              shadowColor: theme.colors.shadow,
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 8,
+            }),
+            ...(Platform.OS === "android" && {
+              elevation: 8,
+            }),
           },
         ]}
       >
-        <View style={styles.handle} />
+        {/* Handle bar for iOS style */}
+        {Platform.OS === "ios" && (
+          <View
+            style={{
+              width: 40,
+              height: 4,
+              backgroundColor: "#C7C7CC",
+              borderRadius: 2,
+              alignSelf: "center",
+              marginTop: 8,
+              marginBottom: 20,
+            }}
+          />
+        )}
 
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: theme.colors.text }]}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingHorizontal: 20,
+            paddingBottom: 20,
+            paddingTop: Platform.OS === "android" ? 20 : 0,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: Platform.OS === "ios" ? "600" : "bold",
+              color: theme.colors.text,
+            }}
+          >
             Settings
           </Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <Pressable
+            onPress={onClose}
+            style={({ pressed }) => ({
+              padding: 8,
+              borderRadius: Platform.OS === "ios" ? 20 : 24,
+              backgroundColor: pressed
+                ? Platform.OS === "ios"
+                  ? theme.colors.border
+                  : "rgba(0,0,0,0.1)"
+                : "transparent",
+            })}
+            android_ripple={{
+              color: theme.colors.primary,
+              borderless: true,
+            }}
+          >
             <Ionicons name="close" size={24} color={theme.colors.text} />
-          </TouchableOpacity>
+          </Pressable>
         </View>
 
-        <View style={styles.content}>
-          <View
-            style={[
-              styles.settingItem,
-              { borderBottomColor: theme.colors.border },
-            ]}
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
+          <Pressable
+            style={({ pressed }) => ({
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingVertical: 15,
+              paddingHorizontal: 16,
+              borderRadius: Platform.OS === "ios" ? 12 : 8,
+              backgroundColor: pressed
+                ? Platform.OS === "ios"
+                  ? theme.colors.background
+                  : "rgba(0,0,0,0.05)"
+                : Platform.OS === "ios"
+                  ? theme.colors.background
+                  : "transparent",
+              borderWidth: Platform.OS === "ios" ? 1 : 0,
+              borderColor:
+                Platform.OS === "ios" ? theme.colors.border : "transparent",
+              marginBottom: 8,
+            })}
+            android_ripple={{
+              color: theme.colors.primary,
+            }}
           >
-            <View style={styles.settingLeft}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Ionicons
                 name={isDark ? "moon" : "sunny"}
                 size={22}
                 color={theme.colors.text}
               />
-              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginLeft: 15,
+                  color: theme.colors.text,
+                  fontWeight: Platform.OS === "ios" ? "400" : "normal",
+                }}
+              >
                 Dark Mode
               </Text>
             </View>
@@ -85,75 +176,9 @@ const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               }}
               thumbColor={isDark ? "#FFFFFF" : "#F4F3F4"}
             />
-          </View>
+          </Pressable>
         </View>
       </Animated.View>
     </>
   );
 };
-
-const styles = StyleSheet.create({
-  backdrop: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 999,
-  },
-  drawer: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    width: 300,
-    zIndex: 1000,
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#C7C7CC",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 8,
-    marginBottom: 20,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  closeButton: {
-    padding: 5,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  settingItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  settingLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  settingLabel: {
-    fontSize: 16,
-    marginLeft: 15,
-  },
-});
-
-export default SettingsDrawer;
