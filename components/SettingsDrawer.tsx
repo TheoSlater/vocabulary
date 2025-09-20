@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,17 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
   isDark,
   toggleTheme,
 }) => {
+  const [switchValue, setSwitchValue] = useState(isDark);
+
+  useEffect(() => {
+    // Add a small delay to prevent choppy animation
+    const timer = setTimeout(() => {
+      setSwitchValue(isDark);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [isDark]);
+
   if (!isOpen) return null;
 
   return (
@@ -71,8 +82,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
           },
         ]}
       >
-        {/* Handle bar for iOS style */}
-        {Platform.OS === "ios" && (
+        {/* {Platform.OS === "ios" && (
           <View
             style={{
               width: 40,
@@ -84,7 +94,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               marginBottom: 20,
             }}
           />
-        )}
+        )} */}
 
         <View
           style={{
@@ -93,7 +103,7 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
             alignItems: "center",
             paddingHorizontal: 20,
             paddingBottom: 20,
-            paddingTop: Platform.OS === "android" ? 20 : 0,
+            paddingTop: 20,
           }}
         >
           <Text
@@ -168,13 +178,24 @@ export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({
               </Text>
             </View>
             <Switch
-              value={isDark}
+              key={`switch-${isDark}`} // Force re-render on theme change
+              value={switchValue}
               onValueChange={toggleTheme}
               trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
+                false: Platform.OS === "ios" ? "#767577" : theme.colors.border,
+                true:
+                  Platform.OS === "ios"
+                    ? theme.colors.primary
+                    : theme.colors.primary,
               }}
-              thumbColor={isDark ? "#FFFFFF" : "#F4F3F4"}
+              thumbColor={
+                Platform.OS === "ios"
+                  ? "#f4f3f4"
+                  : switchValue
+                    ? "#FFFFFF"
+                    : "#F4F3F4"
+              }
+              ios_backgroundColor={theme.colors.border}
             />
           </Pressable>
         </View>
