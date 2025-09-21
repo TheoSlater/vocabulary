@@ -8,6 +8,7 @@ import {
   StatusBar,
   TouchableOpacity,
 } from "react-native";
+import * as Haptics from "expo-haptics";
 import {
   getWordOfTheDay,
   getRandomWords,
@@ -46,14 +47,12 @@ const HomeScreen: React.FC = () => {
     const fetchRandomWords = async () => {
       const wordsWithDefinitions: Word[] = [];
 
-      // Get a larger batch to account for words without definitions
-      const words = await getRandomWords(30); // Get more than we need
+      const words = await getRandomWords(30);
 
       for (const w of words) {
         if (wordsWithDefinitions.length >= 10) break;
 
         const def = await getWordDefinition(w);
-        // Only add words that have valid definitions
         if (
           def &&
           def.definition &&
@@ -63,7 +62,6 @@ const HomeScreen: React.FC = () => {
         }
       }
 
-      // If we still don't have enough, try one more batch
       if (wordsWithDefinitions.length < 10) {
         const moreWords = await getRandomWords(20);
         for (const w of moreWords) {
@@ -103,6 +101,11 @@ const HomeScreen: React.FC = () => {
     },
   });
 
+  // Subtle haptic feedback on scroll snap
+  const handleScrollEnd = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
   return (
     <>
       <StatusBar
@@ -113,6 +116,7 @@ const HomeScreen: React.FC = () => {
         pagingEnabled
         showsVerticalScrollIndicator={false}
         style={dynamicStyles.container}
+        onMomentumScrollEnd={handleScrollEnd} // 👈 haptics on scroll snap
       >
         {wordOfTheDay && (
           <WordCard
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 25,
-    elevation: 3, // shadow for Android
+    elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
