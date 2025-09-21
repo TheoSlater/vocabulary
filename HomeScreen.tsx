@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, Dimensions, StatusBar } from "react-native";
 import * as Haptics from "expo-haptics";
 import {
   getWordOfTheDay,
@@ -19,7 +11,6 @@ import { SettingsButton } from "./components/SettingsButton";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { WordCard } from "./components/WordCard";
 import { useSettingsDrawer } from "./hooks/useSettingsDrawer";
-import { Ionicons } from "@expo/vector-icons";
 import { PracticeButton } from "./components/PracticeButton";
 
 export interface Word {

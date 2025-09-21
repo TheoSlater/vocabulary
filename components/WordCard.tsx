@@ -18,55 +18,69 @@ export const WordCard: React.FC<WordCardProps> = ({
 }) => {
   const { theme } = useTheme();
 
-  const dynamicStyles = StyleSheet.create({
-    card: {
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 20,
-      backgroundColor: theme.colors.background,
-    },
-    heading: {
-      fontSize: 18,
-      fontWeight: "bold",
-      color: theme.colors.primary,
-      letterSpacing: 2,
-    },
-    date: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      marginBottom: 10,
-    },
-    word: {
-      fontSize: 32,
-      fontWeight: "bold",
-      marginVertical: 10,
-      color: theme.colors.text,
-    },
-    partOfSpeech: {
-      fontStyle: "italic",
-      color: theme.colors.textSecondary,
-      fontSize: 16,
-    },
-    definition: {
-      fontSize: 16,
-      textAlign: "center",
-      marginTop: 10,
-      color: theme.colors.text,
-      lineHeight: 24,
-    },
-  });
-
   return (
-    <View style={[dynamicStyles.card, style]}>
+    <View
+      style={[styles.card, { backgroundColor: theme.colors.background }, style]}
+    >
       {isWordOfDay && (
         <>
-          <Text style={dynamicStyles.heading}>WORD OF THE DAY</Text>
-          {date && <Text style={dynamicStyles.date}>{date}</Text>}
+          <Text style={[styles.heading, { color: theme.colors.primary }]}>
+            WORD OF THE DAY
+          </Text>
+          {date && (
+            <Text style={[styles.date, { color: theme.colors.textSecondary }]}>
+              {date}
+            </Text>
+          )}
         </>
       )}
-      <Text style={dynamicStyles.word}>{word.word}</Text>
-      <Text style={dynamicStyles.partOfSpeech}>{word.partOfSpeech}</Text>
-      <Text style={dynamicStyles.definition}>{word.definition}</Text>
+      <Text style={[styles.word, { color: theme.colors.text }]}>
+        {word.word}
+      </Text>
+      {word.partOfSpeech && (
+        <Text
+          style={[styles.partOfSpeech, { color: theme.colors.textSecondary }]}
+        >
+          {word.partOfSpeech}
+        </Text>
+      )}
+      {word.definition && (
+        <Text style={[styles.definition, { color: theme.colors.text }]}>
+          {word.definition}
+        </Text>
+      )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  heading: {
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 2,
+  },
+  date: {
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  word: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
+  partOfSpeech: {
+    fontStyle: "italic",
+    fontSize: 16,
+  },
+  definition: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
+    lineHeight: 24,
+  },
+});
