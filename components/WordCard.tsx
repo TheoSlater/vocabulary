@@ -82,6 +82,11 @@ export const WordCard: React.FC<WordCardProps> = ({
       <Text style={[styles.word, { color: theme.colors.text }]}>
         {word.word}
       </Text>
+      <Text
+        style={[styles.pronunciation, { color: theme.colors.textSecondary }]}
+      >
+        {word.pronunciation}
+      </Text>
 
       {word.partOfSpeech && (
         <Text
@@ -154,6 +159,12 @@ const styles = StyleSheet.create({
     minWidth: 40,
     minHeight: 40,
     marginTop: 15,
+  },
+  pronunciation: {
+    fontSize: 18,
+    fontStyle: "italic",
+    marginBottom: 5,
+    textAlign: "center",
   },
   partOfSpeech: {
     fontStyle: "italic",

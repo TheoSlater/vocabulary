@@ -18,6 +18,7 @@ import { useHaptics } from "./utils/HapticsManager";
 export interface Word {
   word: string;
   definition?: string;
+  pronunciation?: string;
   partOfSpeech?: string;
   isWordOfDay?: boolean;
 }
@@ -48,7 +49,7 @@ const HomeScreen: React.FC = () => {
       for (const w of words) {
         if (wordsWithDefinitions.length >= 10) break;
 
-        const def = await getWordDefinition(w);
+        const def = await getWordDefinition(w.word);
         if (
           def &&
           def.definition &&
@@ -63,7 +64,7 @@ const HomeScreen: React.FC = () => {
         for (const w of moreWords) {
           if (wordsWithDefinitions.length >= 10) break;
 
-          const def = await getWordDefinition(w);
+          const def = await getWordDefinition(w.word);
           if (
             def &&
             def.definition &&
@@ -148,7 +149,6 @@ const HomeScreen: React.FC = () => {
     );
   }
 
-  // Show home screen
   return (
     <>
       <StatusBar

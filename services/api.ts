@@ -7,6 +7,7 @@ export interface WordDefinition {
   word: string;
   definition: string;
   partOfSpeech: string;
+  pronunciation?: string;
   isWordOfDay?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const getWordOfTheDay = async (): Promise<WordDefinition> => {
       word: data.word,
       definition: data.definitions?.[0]?.text || "No definition available.",
       partOfSpeech: data.definitions?.[0]?.partOfSpeech || "unknown",
+      pronunciation: data.pronunciation?.raw || undefined,
       isWordOfDay: true,
     };
   } catch (error) {
@@ -41,7 +43,9 @@ export const getWordOfTheDay = async (): Promise<WordDefinition> => {
 };
 
 // Random words from JSON
-export const getRandomWords = async (count: number): Promise<string[]> => {
+export const getRandomWords = async (
+  count: number
+): Promise<WordDefinition[]> => {
   if (!randomWords?.words || !Array.isArray(randomWords.words)) {
     console.error("Invalid random words data");
     return [];
@@ -54,7 +58,12 @@ export const getRandomWords = async (count: number): Promise<string[]> => {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
 
-  return shuffled.slice(0, Math.min(count, shuffled.length));
+  return shuffled.slice(0, Math.min(count, shuffled.length)).map((item) => ({
+    word: item.word,
+    pronunciation: item.pronunciation,
+    definition: "", // definition not included in JSON
+    partOfSpeech: "unknown",
+  }));
 };
 
 // Definitions via Free Dictionary API
@@ -65,6 +74,12 @@ export const getWordDefinition = async (
     console.warn("Invalid word provided to getWordDefinition");
     return null;
   }
+
+  // First, check local JSON for pronunciation
+  const localWord = randomWords.words.find(
+    (w) => w.word.toLowerCase() === word.toLowerCase()
+  );
+  const pronunciation = localWord?.pronunciation;
 
   try {
     const response = await fetch(
@@ -92,6 +107,7 @@ export const getWordDefinition = async (
       word: data[0].word,
       definition,
       partOfSpeech: firstMeaning.partOfSpeech || "unknown",
+      pronunciation,
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -99,6 +115,11 @@ export const getWordDefinition = async (
     } else {
       console.warn(`No definition found for "${word}":`, error);
     }
-    return null;
+    return {
+      word,
+      definition: "No definition found.",
+      partOfSpeech: "unknown",
+      pronunciation,
+    };
   }
 };
