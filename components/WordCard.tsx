@@ -121,12 +121,6 @@ export const WordCard: React.FC<WordCardProps> = ({
           />
         </TouchableOpacity>
       )}
-
-      {isFavorited && (
-        <Text style={[styles.favoritedLabel, { color: theme.colors.primary }]}>
-          ★ Favorited
-        </Text>
-      )}
     </View>
   );
 };

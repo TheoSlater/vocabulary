@@ -7,8 +7,10 @@ import {
 } from "./services/api";
 import { useTheme } from "./contexts/ThemeContext";
 import { SettingsButton } from "./components/SettingsButton";
+import { FavoritesButton } from "./components/FavouritesButton";
 import { SettingsDrawer } from "./components/SettingsDrawer";
 import { WordCard } from "./components/WordCard";
+import { FavoritesScreen } from "./screens/FavouritesScreen";
 import { useSettingsDrawer } from "./hooks/useSettingsDrawer";
 import { PracticeButton } from "./components/PracticeButton";
 import { useHaptics } from "./utils/HapticsManager";
@@ -26,6 +28,7 @@ const HomeScreen: React.FC = () => {
   const { theme, isDark, toggleTheme } = useTheme();
   const [wordOfTheDay, setWordOfTheDay] = useState<Word | null>(null);
   const [randomWords, setRandomWords] = useState<Word[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
   const { isDrawerOpen, openDrawer, closeDrawer, translateY } =
     useSettingsDrawer();
 
@@ -105,9 +108,47 @@ const HomeScreen: React.FC = () => {
 
   const handlePracticePress = async () => {
     await haptics.onButtonPress();
-    // Practice functionality will be handled by the Practice tab
+    // TODO: Navigate to Practice Screen
   };
 
+  const handleFavoritesPress = async () => {
+    await haptics.onButtonPress();
+    if (showFavorites) {
+      setShowFavorites(false);
+    } else {
+      setShowFavorites(true);
+    }
+  };
+
+  const handleCloseFavorites = async () => {
+    await haptics.onButtonPress();
+    setShowFavorites(false);
+  };
+
+  // Show favorites screen if showFavorites is true
+  if (showFavorites) {
+    return (
+      <>
+        <FavoritesScreen onClose={handleCloseFavorites} />
+        <FavoritesButton
+          onPress={handleFavoritesPress}
+          theme={theme}
+          isOnFavoritesScreen={true}
+        />
+        <SettingsButton onPress={handleSettingsPress} theme={theme} />
+        <SettingsDrawer
+          isOpen={isDrawerOpen}
+          onClose={closeDrawer}
+          translateY={translateY}
+          theme={theme}
+          isDark={isDark}
+          toggleTheme={toggleTheme}
+        />
+      </>
+    );
+  }
+
+  // Show home screen
   return (
     <>
       <StatusBar
@@ -134,8 +175,13 @@ const HomeScreen: React.FC = () => {
         ))}
       </ScrollView>
 
-      <SettingsButton onPress={handleSettingsPress} theme={theme} />
+      <FavoritesButton
+        onPress={handleFavoritesPress}
+        theme={theme}
+        isOnFavoritesScreen={false}
+      />
 
+      <SettingsButton onPress={handleSettingsPress} theme={theme} />
       <SettingsDrawer
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
@@ -144,8 +190,6 @@ const HomeScreen: React.FC = () => {
         isDark={isDark}
         toggleTheme={toggleTheme}
       />
-
-      {/* Keep PracticeButton if you want quick access, or remove it since there's a Practice tab */}
       <PracticeButton onPress={handlePracticePress} theme={theme} />
     </>
   );
