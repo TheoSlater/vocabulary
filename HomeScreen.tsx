@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Dimensions, StatusBar } from "react-native";
-import * as Haptics from "expo-haptics";
 import {
   getWordOfTheDay,
   getRandomWords,
@@ -12,6 +11,7 @@ import { SettingsDrawer } from "./components/SettingsDrawer";
 import { WordCard } from "./components/WordCard";
 import { useSettingsDrawer } from "./hooks/useSettingsDrawer";
 import { PracticeButton } from "./components/PracticeButton";
+import { useHaptics } from "./utils/HapticsManager";
 
 export interface Word {
   word: string;
@@ -28,6 +28,8 @@ const HomeScreen: React.FC = () => {
   const [randomWords, setRandomWords] = useState<Word[]>([]);
   const { isDrawerOpen, openDrawer, closeDrawer, translateY } =
     useSettingsDrawer();
+
+  const { haptics } = useHaptics();
 
   useEffect(() => {
     const fetchWordOfTheDay = async () => {
@@ -92,9 +94,18 @@ const HomeScreen: React.FC = () => {
     },
   });
 
-  // Subtle haptic feedback on scroll snap
   const handleScrollEnd = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await haptics.onScroll();
+  };
+
+  const handleSettingsPress = async () => {
+    await haptics.onButtonPress();
+    openDrawer();
+  };
+
+  const handlePracticePress = async () => {
+    await haptics.onButtonPress();
+    // Practice functionality will be handled by the Practice tab
   };
 
   return (
@@ -107,7 +118,7 @@ const HomeScreen: React.FC = () => {
         pagingEnabled
         showsVerticalScrollIndicator={false}
         style={dynamicStyles.container}
-        onMomentumScrollEnd={handleScrollEnd} // 👈 haptics on scroll snap
+        onMomentumScrollEnd={handleScrollEnd}
       >
         {wordOfTheDay && (
           <WordCard
@@ -123,7 +134,7 @@ const HomeScreen: React.FC = () => {
         ))}
       </ScrollView>
 
-      <SettingsButton onPress={openDrawer} theme={theme} />
+      <SettingsButton onPress={handleSettingsPress} theme={theme} />
 
       <SettingsDrawer
         isOpen={isDrawerOpen}
@@ -133,30 +144,11 @@ const HomeScreen: React.FC = () => {
         isDark={isDark}
         toggleTheme={toggleTheme}
       />
-      <PracticeButton onPress={() => {}} theme={theme} />
+
+      {/* Keep PracticeButton if you want quick access, or remove it since there's a Practice tab */}
+      <PracticeButton onPress={handlePracticePress} theme={theme} />
     </>
   );
 };
 
 export default HomeScreen;
-
-const styles = StyleSheet.create({
-  practiceButton: {
-    position: "absolute",
-    bottom: 20,
-    left: 0,
-    right: 0,
-    alignSelf: "center",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-});
