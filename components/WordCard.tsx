@@ -79,36 +79,9 @@ export const WordCard: React.FC<WordCardProps> = ({
         </>
       )}
 
-      <View style={styles.wordContainer}>
-        <Text style={[styles.word, { color: theme.colors.text }]}>
-          {word.word}
-        </Text>
-
-        {/* Favorite Button - only show if word has definition */}
-        {word.definition && (
-          <TouchableOpacity
-            style={[
-              styles.favoriteButton,
-              {
-                backgroundColor: isFavorited
-                  ? theme.colors.primary + "20"
-                  : theme.colors.textSecondary + "10",
-              },
-            ]}
-            onPress={handleFavoritePress}
-            disabled={isToggling}
-            activeOpacity={0.7}
-          >
-            <Ionicons
-              name={isFavorited ? "heart" : "heart-outline"}
-              size={24}
-              color={
-                isFavorited ? theme.colors.primary : theme.colors.textSecondary
-              }
-            />
-          </TouchableOpacity>
-        )}
-      </View>
+      <Text style={[styles.word, { color: theme.colors.text }]}>
+        {word.word}
+      </Text>
 
       {word.partOfSpeech && (
         <Text
@@ -122,6 +95,31 @@ export const WordCard: React.FC<WordCardProps> = ({
         <Text style={[styles.definition, { color: theme.colors.text }]}>
           {word.definition}
         </Text>
+      )}
+
+      {/* Favorite Button - positioned underneath definition */}
+      {word.definition && (
+        <TouchableOpacity
+          style={[
+            styles.favoriteButton,
+            {
+              backgroundColor: isFavorited
+                ? theme.colors.primary + "20"
+                : theme.colors.textSecondary + "10",
+            },
+          ]}
+          onPress={handleFavoritePress}
+          disabled={isToggling}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name={isFavorited ? "heart" : "heart-outline"}
+            size={24}
+            color={
+              isFavorited ? theme.colors.primary : theme.colors.textSecondary
+            }
+          />
+        </TouchableOpacity>
       )}
 
       {isFavorited && (
@@ -148,17 +146,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
-  wordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 10,
-    gap: 15,
-  },
   word: {
     fontSize: 32,
     fontWeight: "bold",
     textAlign: "center",
-    flex: 1,
+    marginVertical: 10,
   },
   favoriteButton: {
     padding: 8,
@@ -167,6 +159,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     minWidth: 40,
     minHeight: 40,
+    marginTop: 15,
   },
   partOfSpeech: {
     fontStyle: "italic",
