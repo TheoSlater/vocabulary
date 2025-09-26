@@ -63,123 +63,229 @@ export const WordCard: React.FC<WordCardProps> = ({
   };
 
   return (
-    <View
-      style={[styles.card, { backgroundColor: theme.colors.background }, style]}
-    >
-      {isWordOfDay && (
-        <>
-          <Text style={[styles.heading, { color: theme.colors.primary }]}>
-            WORD OF THE DAY
+    <View style={[styles.cardContainer, style]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.background,
+          },
+        ]}
+      >
+        {/* Header Section */}
+        {isWordOfDay && (
+          <View style={styles.headerContainer}>
+            <View
+              style={[
+                styles.badge,
+                { backgroundColor: theme.colors.primary + "15" },
+              ]}
+            >
+              <Ionicons
+                name="star"
+                size={14}
+                color={theme.colors.primary}
+                style={styles.badgeIcon}
+              />
+              <Text style={[styles.heading, { color: theme.colors.primary }]}>
+                WORD OF THE DAY
+              </Text>
+            </View>
+            {date && (
+              <Text
+                style={[styles.date, { color: theme.colors.textSecondary }]}
+              >
+                {date}
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* Word Section */}
+        <View style={styles.wordSection}>
+          <Text style={[styles.word, { color: theme.colors.text }]}>
+            {word.word}
           </Text>
-          {date && (
-            <Text style={[styles.date, { color: theme.colors.textSecondary }]}>
-              {date}
+
+          {word.pronunciation && (
+            <Text
+              style={[
+                styles.pronunciation,
+                { color: theme.colors.textSecondary },
+              ]}
+            >
+              {word.pronunciation}
             </Text>
           )}
-        </>
-      )}
 
-      <Text style={[styles.word, { color: theme.colors.text }]}>
-        {word.word}
-      </Text>
-      <Text
-        style={[styles.pronunciation, { color: theme.colors.textSecondary }]}
-      >
-        {word.pronunciation}
-      </Text>
+          {word.partOfSpeech && (
+            <View
+              style={[
+                styles.partOfSpeechContainer,
+                { backgroundColor: theme.colors.textSecondary + "10" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.partOfSpeech,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                {word.partOfSpeech}
+              </Text>
+            </View>
+          )}
+        </View>
 
-      {word.partOfSpeech && (
-        <Text
-          style={[styles.partOfSpeech, { color: theme.colors.textSecondary }]}
-        >
-          {word.partOfSpeech}
-        </Text>
-      )}
+        {/* Definition Section */}
+        {word.definition && (
+          <View style={styles.definitionContainer}>
+            <View
+              style={[
+                styles.definitionDivider,
+                { backgroundColor: theme.colors.textSecondary + "20" },
+              ]}
+            />
+            <Text style={[styles.definition, { color: theme.colors.text }]}>
+              {word.definition}
+            </Text>
+          </View>
+        )}
 
-      {word.definition && (
-        <Text style={[styles.definition, { color: theme.colors.text }]}>
-          {word.definition}
-        </Text>
-      )}
-
-      {/* Favorite Button - positioned underneath definition */}
-      {word.definition && (
-        <TouchableOpacity
-          style={[
-            styles.favoriteButton,
-            {
-              backgroundColor: isFavorited
-                ? theme.colors.primary + "20"
-                : theme.colors.textSecondary + "10",
-            },
-          ]}
-          onPress={handleFavoritePress}
-          disabled={isToggling}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name={isFavorited ? "heart" : "heart-outline"}
-            size={24}
-            color={
-              isFavorited ? theme.colors.primary : theme.colors.textSecondary
-            }
-          />
-        </TouchableOpacity>
-      )}
+        {/* Favorite Button */}
+        {word.definition && (
+          <TouchableOpacity
+            style={[
+              styles.favoriteButton,
+              {
+                backgroundColor: isFavorited
+                  ? theme.colors.primary + "15"
+                  : theme.colors.textSecondary + "08",
+                borderColor: isFavorited
+                  ? theme.colors.primary + "30"
+                  : theme.colors.textSecondary + "20",
+              },
+            ]}
+            onPress={handleFavoritePress}
+            disabled={isToggling}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={isFavorited ? "heart" : "heart-outline"}
+              size={20}
+              color={
+                isFavorited ? theme.colors.primary : theme.colors.textSecondary
+              }
+            />
+            <Text
+              style={[
+                styles.favoriteText,
+                {
+                  color: isFavorited
+                    ? theme.colors.primary
+                    : theme.colors.textSecondary,
+                },
+              ]}
+            >
+              {isFavorited ? "Favorited" : "Add to Favorites"}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  cardContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
   card: {
-    justifyContent: "center",
+    padding: 24,
+  },
+  headerContainer: {
     alignItems: "center",
-    padding: 20,
+    marginBottom: 20,
+  },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
+  },
+  badgeIcon: {
+    marginRight: 6,
   },
   heading: {
-    fontSize: 18,
-    fontWeight: "bold",
-    letterSpacing: 2,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.2,
   },
   date: {
-    fontSize: 14,
-    marginBottom: 10,
+    fontSize: 13,
+    fontWeight: "500",
+    opacity: 0.8,
+  },
+  wordSection: {
+    alignItems: "center",
+    marginBottom: 20,
   },
   word: {
-    fontSize: 32,
-    fontWeight: "bold",
+    fontSize: 36,
+    fontWeight: "800",
     textAlign: "center",
-    marginVertical: 10,
-  },
-  favoriteButton: {
-    padding: 8,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    minWidth: 40,
-    minHeight: 40,
-    marginTop: 15,
+    marginBottom: 8,
+    letterSpacing: 0.5,
   },
   pronunciation: {
-    fontSize: 18,
+    fontSize: 16,
     fontStyle: "italic",
-    marginBottom: 5,
     textAlign: "center",
+    marginBottom: 12,
+    opacity: 0.8,
+  },
+  partOfSpeechContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   partOfSpeech: {
-    fontStyle: "italic",
-    fontSize: 16,
+    fontSize: 13,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  definitionContainer: {
+    marginBottom: 20,
+  },
+  definitionDivider: {
+    height: 1,
+    width: "100%",
+    marginBottom: 16,
   },
   definition: {
     fontSize: 16,
     textAlign: "center",
-    marginTop: 10,
     lineHeight: 24,
+    fontWeight: "400",
   },
-  favoritedLabel: {
+  favoriteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    alignSelf: "center",
+    minWidth: 160,
+  },
+  favoriteText: {
     fontSize: 14,
     fontWeight: "600",
-    marginTop: 8,
-    opacity: 0.8,
+    marginLeft: 8,
   },
 });

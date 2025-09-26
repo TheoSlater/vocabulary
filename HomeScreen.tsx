@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Dimensions, StatusBar } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  View,
+} from "react-native";
 import {
   getWordOfTheDay,
   getRandomWords,
@@ -23,63 +29,81 @@ export interface Word {
   isWordOfDay?: boolean;
 }
 
-const { height } = Dimensions.get("window");
+const { height: screenHeight, width: screenWidth } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
   const { theme, isDark, toggleTheme } = useTheme();
   const [wordOfTheDay, setWordOfTheDay] = useState<Word | null>(null);
   const [randomWords, setRandomWords] = useState<Word[]>([]);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { isDrawerOpen, openDrawer, closeDrawer, translateY } =
     useSettingsDrawer();
 
   const { haptics } = useHaptics();
 
   useEffect(() => {
-    const fetchWordOfTheDay = async () => {
-      const wotd = await getWordOfTheDay();
-      setWordOfTheDay(wotd);
-    };
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch word of the day and random words in parallel
+        const [wotd, words] = await Promise.all([
+          getWordOfTheDay(),
+          getRandomWords(30),
+        ]);
 
-    const fetchRandomWords = async () => {
-      const wordsWithDefinitions: Word[] = [];
+        setWordOfTheDay(wotd);
 
-      const words = await getRandomWords(30);
+        // Process random words with definitions
+        const wordsWithDefinitions: Word[] = [];
 
-      for (const w of words) {
-        if (wordsWithDefinitions.length >= 10) break;
-
-        const def = await getWordDefinition(w.word);
-        if (
-          def &&
-          def.definition &&
-          def.definition !== "No definition found."
-        ) {
-          wordsWithDefinitions.push(def);
-        }
-      }
-
-      if (wordsWithDefinitions.length < 10) {
-        const moreWords = await getRandomWords(20);
-        for (const w of moreWords) {
+        for (const w of words) {
           if (wordsWithDefinitions.length >= 10) break;
 
-          const def = await getWordDefinition(w.word);
-          if (
-            def &&
-            def.definition &&
-            def.definition !== "No definition found."
-          ) {
-            wordsWithDefinitions.push(def);
+          try {
+            const def = await getWordDefinition(w.word);
+            if (
+              def &&
+              def.definition &&
+              def.definition !== "No definition found."
+            ) {
+              wordsWithDefinitions.push(def);
+            }
+          } catch (error) {
+            console.warn(`Failed to fetch definition for ${w.word}:`, error);
           }
         }
-      }
 
-      setRandomWords(wordsWithDefinitions);
+        // If we don't have enough words, fetch more
+        if (wordsWithDefinitions.length < 10) {
+          const moreWords = await getRandomWords(20);
+          for (const w of moreWords) {
+            if (wordsWithDefinitions.length >= 10) break;
+
+            try {
+              const def = await getWordDefinition(w.word);
+              if (
+                def &&
+                def.definition &&
+                def.definition !== "No definition found."
+              ) {
+                wordsWithDefinitions.push(def);
+              }
+            } catch (error) {
+              console.warn(`Failed to fetch definition for ${w.word}:`, error);
+            }
+          }
+        }
+
+        setRandomWords(wordsWithDefinitions);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchWordOfTheDay();
-    fetchRandomWords();
+    fetchData();
   }, []);
 
   const today = new Date().toLocaleDateString();
@@ -90,53 +114,105 @@ const HomeScreen: React.FC = () => {
       backgroundColor: theme.colors.background,
     },
     card: {
-      height,
+      height: screenHeight,
+      width: screenWidth,
       justifyContent: "center",
       alignItems: "center",
       padding: 20,
       backgroundColor: theme.colors.background,
     },
+    buttonContainer: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      pointerEvents: "box-none",
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+    },
   });
 
   const handleScrollEnd = async () => {
-    await haptics.onScroll();
+    try {
+      await haptics.onScroll();
+    } catch (error) {
+      console.warn("Haptics error:", error);
+    }
   };
 
   const handleSettingsPress = async () => {
-    await haptics.onButtonPress();
+    try {
+      await haptics.onButtonPress();
+    } catch (error) {
+      console.warn("Haptics error:", error);
+    }
     openDrawer();
   };
 
   const handlePracticePress = async () => {
-    await haptics.onButtonPress();
+    try {
+      await haptics.onButtonPress();
+    } catch (error) {
+      console.warn("Haptics error:", error);
+    }
     // TODO: Navigate to Practice Screen
   };
 
   const handleFavoritesPress = async () => {
-    await haptics.onButtonPress();
-    if (showFavorites) {
-      setShowFavorites(false);
-    } else {
-      setShowFavorites(true);
+    try {
+      await haptics.onButtonPress();
+    } catch (error) {
+      console.warn("Haptics error:", error);
     }
+    setShowFavorites(!showFavorites);
   };
 
   const handleCloseFavorites = async () => {
-    await haptics.onButtonPress();
+    try {
+      await haptics.onButtonPress();
+    } catch (error) {
+      console.warn("Haptics error:", error);
+    }
     setShowFavorites(false);
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View style={dynamicStyles.loadingContainer}>
+        {/* Add your loading component here */}
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={theme.colors.background}
+        />
+      </View>
+    );
+  }
 
   // Show favorites screen if showFavorites is true
   if (showFavorites) {
     return (
-      <>
-        <FavoritesScreen onClose={handleCloseFavorites} />
-        <FavoritesButton
-          onPress={handleFavoritesPress}
-          theme={theme}
-          isOnFavoritesScreen={true}
+      <View style={dynamicStyles.container}>
+        <StatusBar
+          barStyle={isDark ? "light-content" : "dark-content"}
+          backgroundColor={theme.colors.background}
         />
-        <SettingsButton onPress={handleSettingsPress} theme={theme} />
+        <FavoritesScreen onClose={handleCloseFavorites} />
+
+        <View style={dynamicStyles.buttonContainer}>
+          <FavoritesButton
+            onPress={handleFavoritesPress}
+            theme={theme}
+            isOnFavoritesScreen={true}
+          />
+          <SettingsButton onPress={handleSettingsPress} theme={theme} />
+        </View>
+
         <SettingsDrawer
           isOpen={isDrawerOpen}
           onClose={closeDrawer}
@@ -145,21 +221,25 @@ const HomeScreen: React.FC = () => {
           isDark={isDark}
           toggleTheme={toggleTheme}
         />
-      </>
+      </View>
     );
   }
 
   return (
-    <>
+    <View style={dynamicStyles.container}>
       <StatusBar
         barStyle={isDark ? "light-content" : "dark-content"}
         backgroundColor={theme.colors.background}
       />
+
       <ScrollView
         pagingEnabled
         showsVerticalScrollIndicator={false}
         style={dynamicStyles.container}
+        contentContainerStyle={{ flexGrow: 1 }}
         onMomentumScrollEnd={handleScrollEnd}
+        bounces={false}
+        decelerationRate="fast"
       >
         {wordOfTheDay && (
           <WordCard
@@ -171,17 +251,24 @@ const HomeScreen: React.FC = () => {
         )}
 
         {randomWords.map((word, idx) => (
-          <WordCard key={idx} word={word} style={dynamicStyles.card} />
+          <WordCard
+            key={`${word.word}-${idx}`}
+            word={word}
+            style={dynamicStyles.card}
+          />
         ))}
       </ScrollView>
 
-      <FavoritesButton
-        onPress={handleFavoritesPress}
-        theme={theme}
-        isOnFavoritesScreen={false}
-      />
+      <View style={dynamicStyles.buttonContainer}>
+        <FavoritesButton
+          onPress={handleFavoritesPress}
+          theme={theme}
+          isOnFavoritesScreen={false}
+        />
+        <SettingsButton onPress={handleSettingsPress} theme={theme} />
+        <PracticeButton onPress={handlePracticePress} theme={theme} />
+      </View>
 
-      <SettingsButton onPress={handleSettingsPress} theme={theme} />
       <SettingsDrawer
         isOpen={isDrawerOpen}
         onClose={closeDrawer}
@@ -190,8 +277,7 @@ const HomeScreen: React.FC = () => {
         isDark={isDark}
         toggleTheme={toggleTheme}
       />
-      <PracticeButton onPress={handlePracticePress} theme={theme} />
-    </>
+    </View>
   );
 };
 
